@@ -11,6 +11,8 @@
 - 4 CPU cores, 8 GB RAM, 64 GB disk, virtual TPM (enabled by encrypting the VM in Fusion)
 - A snapshot named **"Fresh OOBE"** at the first setup screen, so I could return to an unconfigured machine at any time
 
+![Fresh OOBE snapshot point](images/fresh-oobe.png)
+
 **Problem:** the VM booted to an "EFI Network" timeout screen instead of the installer.
 **Cause:** it missed the brief "press any key to boot from CD" prompt and fell back to network boot.
 **Fix:** restarted and pressed a key immediately, and set the startup disk to CD/DVD for the install. (This setting caused a problem later; see the BitLocker log.)
@@ -21,6 +23,7 @@
 - **Dynamic device group** `DG-Windows-Laptops` with the rule `(device.deviceOSType -eq "Windows")`, so every Windows device joins automatically.
 
 ![Automatic enrollment](images/auto-enrollment.png)
+![DG-Windows-Laptops](images/dg-windows-laptops.png)
 
 ## 2. Enrolling the device
 
@@ -29,6 +32,7 @@ I signed in to the VM as a superintendent, not as an administrator. A laptop's p
 The device joined Entra ID and appeared in Intune with the superintendent as primary user.
 
 ![Device connected to work account](images/access-work-or-school.png)
+![Areas managed by the company](images/areas-managed.png)
 
 ## 3. Policies, patching, and apps
 

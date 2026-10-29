@@ -51,6 +51,7 @@ I verified the restrictions by signing in as the admin account:
 - ❌ Resetting a Global Administrator's password: blocked
 - ❌ Billing and most admin areas: hidden
 
+![Admin account resetting a user password](images/admin-password-reset.png)
 ![Admin account with restricted menu](images/admin-limited-menu.png)
 
 Roles were added only when a task required them. The Intune Administrator role was added in Project 3 for Autopilot device imports.

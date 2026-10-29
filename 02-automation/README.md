@@ -49,8 +49,6 @@ The second run of the same CSV skipped both users with warnings instead of creat
 
 ![Onboarding run and idempotent rerun](images/onboarding-idempotent.png)
 
-<!-- TODO: blur the temporary passwords and the lab-credentials file name in this screenshot before adding it. -->
-
 **Security note:** the script prints each temporary password, which means the transcript log captures it too. That's acceptable in a lab, but in production the password would be delivered securely to the manager, or replaced with a Temporary Access Pass, and never written to a log.
 
 ## 2. Offboarding: `Remove-RidgelineUser.ps1`
@@ -64,7 +62,9 @@ The steps run in a deliberate order:
 
 The account is disabled, not deleted, so it's easy to reverse: re-enable it, convert the mailbox back, and re-add groups.
 
+![Offboarding run](images/offboarding-run.png)
 ![User offboarded](images/offboarding-result.png)
+![Sign-in blocked](images/offboarding-blocked.png)
 
 **Problems I hit:**
 - **"Successful" run, but nothing changed.** I had rerun the command with `-WhatIf` still on the end. A dry run prints output with no errors, so it *looks* successful. The clue was that no log file was created. Lesson: verify the result, don't trust the absence of errors.
