@@ -27,10 +27,11 @@
 
 The 198.51.100.x and 203.0.113.x ranges are reserved for documentation, so they safely stand in for real public addresses.
 
-**Why three trailer VLANs:** <!-- TODO: your answer in your own words -->
+**Why three trailer VLANs:** This was intentional in the case of an “infected” device joining the public wifi. The infection would be unable to see any other sensitive information.
 
 ## Part D: Internet and office
 
+<<<<<<< HEAD
 **ISP-R (the simulated internet)** has three interfaces: one facing the office (198.51.100.1), one facing the trailer (203.0.113.1), and one for the public test server (8.8.8.1). It intentionally has no routes to any 10.x network, which is realistic: the internet doesn't know about a company's private addresses. That's exactly why the trailer needs NAT to reach the internet and a VPN to reach the office.
 
 **PUBLIC-SRV** has static IP 8.8.8.8 with HTTP and DNS turned on, acting as "the internet" for testing.
@@ -129,11 +130,14 @@ The one send error in the IPsec counters is the first packet, dropped while the 
 - Read the router's output after pasting a config, not just the commands.
 - A key's address and a peer's address always point at the other router.
 - When `show` commands go in circles, Simulation mode shows exactly where and why a packet stops.
+=======
+>>>>>>> ef2007307a1a93f7d70557534031de55420cf19e
 
 ## Test results
 
 | From | Test | Expected | Result |
 | --- | --- | --- | --- |
+<<<<<<< HEAD
 | Staff laptop | ping office file server (10.10.10.10) | Success, via VPN | ✅ 0% loss |
 | Staff laptop | browse http://8.8.8.8 | Success, via NAT | <!-- TODO --> |
 | Guest laptop | browse http://8.8.8.8 | Success | ✅ |
@@ -142,3 +146,13 @@ The one send error in the IPsec counters is the first packet, dropped while the 
 | R-TRAILER | `show crypto ipsec sa` | Encrypted packet counters above 0 | ✅ 13 encaps / 12 decaps |
 
 <!-- TODO: add images/guest-blocked.png showing the failed guest ping, and link it here. -->
+=======
+| Staff laptop | ping office file server (10.10.10.10) | Success, via VPN | |
+| Staff laptop | browse http://8.8.8.8 | Success, via NAT | |
+| Guest laptop | browse http://8.8.8.8 | Success | |
+| Guest laptop | ping office file server | **Fails** (by design) | |
+| Guest laptop | ping trailer printer | **Fails** (by design) | |
+| R-TRAILER | `show crypto ipsec sa` | Encrypted packet counters above 0 | |
+
+
+>>>>>>> ef2007307a1a93f7d70557534031de55420cf19e
