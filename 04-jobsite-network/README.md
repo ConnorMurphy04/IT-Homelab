@@ -20,11 +20,10 @@
 
 The 198.51.100.x and 203.0.113.x ranges are reserved for documentation, so they stand in safely for real public addresses.
 
-**Why three trailer VLANs:** <!-- TODO: your answer in your own words -->
+**Why three trailer VLANs:** This was intentional in the case of an “infected” device joining the public wifi. The infection would be unable to see any other sensitive information.
 
 ## Build
 
-<!-- TODO: topology screenshot, configs, and test results as you complete each part. -->
 
 ## Test results
 
@@ -36,3 +35,5 @@ The 198.51.100.x and 203.0.113.x ranges are reserved for documentation, so they 
 | Guest laptop | ping office file server | **Fails** (by design) | |
 | Guest laptop | ping trailer printer | **Fails** (by design) | |
 | R-TRAILER | `show crypto ipsec sa` | Encrypted packet counters above 0 | |
+
+
