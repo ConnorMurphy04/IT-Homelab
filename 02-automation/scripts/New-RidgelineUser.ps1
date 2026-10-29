@@ -1,7 +1,7 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [Parameter(Mandatory)] [string]$CsvPath,
-    [string]$Domain = "ridgelinebuilderslab.onmicrosoft.com",
+    [string]$Domain = "ridgeline.example",
     [string]$LicenseGroup = "SG-Licensed-BusinessPremium"
 )
 

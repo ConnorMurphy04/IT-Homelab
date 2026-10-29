@@ -1,0 +1,142 @@
+NOTE: PRESHARE Keys would never appear in production
+
+R-TRAILER#sh running-config
+Building configuration...
+
+Current configuration : 2281 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R-TRAILER
+!
+!
+!
+!
+ip dhcp excluded-address 10.20.10.1 10.20.10.10
+ip dhcp excluded-address 10.20.20.1 10.20.20.10
+ip dhcp excluded-address 10.20.30.1 10.20.30.10
+!
+ip dhcp pool STAFF
+ network 10.20.10.0 255.255.255.0
+ default-router 10.20.10.1
+ dns-server 8.8.8.8
+ip dhcp pool DEVICES
+ network 10.20.20.0 255.255.255.0
+ default-router 10.20.20.1
+ dns-server 8.8.8.8
+ip dhcp pool GUEST
+ network 10.20.30.0 255.255.255.0
+ default-router 10.20.30.1
+ dns-server 8.8.8.8
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO2911/K9 sn FTX15248A6E-
+license boot module c2900 technology-package securityk9
+!
+!
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 5
+!
+crypto isakmp key RidgelineLab123 address 198.51.100.2
+!
+!
+!
+crypto ipsec transform-set RB-TS esp-aes 256 esp-sha-hmac
+!
+crypto map RB-VPN 10 ipsec-isakmp 
+ set peer 198.51.100.2
+ set transform-set RB-TS 
+ match address 110
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 10.20.10.1 255.255.255.0
+ ip nat inside
+!
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 10.20.20.1 255.255.255.0
+ ip nat inside
+!
+interface GigabitEthernet0/0.30
+ encapsulation dot1Q 30
+ ip address 10.20.30.1 255.255.255.0
+ ip nat inside
+ ip access-group 130 in
+!
+interface GigabitEthernet0/1
+ ip address 203.0.113.2 255.255.255.252
+ ip nat outside
+ duplex auto
+ speed auto
+ crypto map RB-VPN
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip nat inside source list 120 interface GigabitEthernet0/1 overload
+ip classless
+ip route 0.0.0.0 0.0.0.0 203.0.113.1 
+!
+ip flow-export version 9
+!
+!
+access-list 130 deny ip 10.20.30.0 0.0.0.255 10.0.0.0 0.255.255.255
+access-list 130 permit ip any any
+access-list 120 deny ip 10.20.10.0 0.0.0.255 10.10.10.0 0.0.0.255
+access-list 120 permit ip 10.20.0.0 0.0.255.255 any
+access-list 110 permit ip 10.20.10.0 0.0.0.255 10.10.10.0 0.0.0.255
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end

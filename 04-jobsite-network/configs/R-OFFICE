@@ -1,0 +1,105 @@
+NOTE: PRESHARE Keys would never appear in production
+
+R-OFFICE#sh running-config
+Building configuration...
+
+Current configuration : 1198 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R-OFFICE
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO2911/K9 sn FTX1524JF90-
+license boot module c2900 technology-package securityk9
+!
+!
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 5
+!
+crypto isakmp key RidgelineLab123 address 203.0.113.2
+!
+!
+!
+crypto ipsec transform-set RB-TS esp-aes 256 esp-sha-hmac
+!
+crypto map RB-VPN 10 ipsec-isakmp 
+ set peer 203.0.113.2
+ set transform-set RB-TS 
+ match address 110
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ ip address 10.10.10.1 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ ip address 198.51.100.2 255.255.255.252
+ duplex auto
+ speed auto
+ crypto map RB-VPN
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 198.51.100.1 
+!
+ip flow-export version 9
+!
+!
+access-list 110 permit ip 10.10.10.0 0.0.0.255 10.20.10.0 0.0.0.255
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
