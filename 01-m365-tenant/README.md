@@ -1,127 +1,90 @@
 # Project 1: Microsoft 365 / Entra ID Tenant
 
-**Goal:** Stand up Ridgeline's cloud tenant with users, group-based licensing, least-privilege admin roles, a break-glass account, MFA enforced through Conditional Access, shared mailboxes, and Teams.
+For this project I set up Ridgeline's Microsoft 365 tenant: users and groups, licensing through group membership, separate admin accounts, an emergency break-glass account, MFA through Conditional Access, shared mailboxes, and a Teams team for a jobsite.
 
-**What it shows:** Microsoft 365 administration (users, licenses, Exchange Online, Teams), Entra ID, MFA, and least-privilege access.
+## Tenant setup
 
----
+I started a Microsoft 365 Business Premium trial (30 days, 25 licenses). I picked Business Premium because it includes Entra ID P1, which Conditional Access needs, and Intune, which I used in Project 3.
 
-## 1. Tenant setup
+Right after signing up I turned off recurring billing so the trial would expire instead of turning into a paid annual plan.
 
-I started a Microsoft 365 Business Premium trial (30 days, 25 licenses). Business Premium includes Entra ID P1, needed for Conditional Access and sign-in reporting, and Intune, needed for Project 3.
+## Users and group-based licensing
 
-The first thing I did after signup was **turn off recurring billing**, so the trial expires instead of converting to a paid annual plan. Cost control is part of the job.
-
-## 2. Users and group-based licensing
-
-I created the company's employees with job titles and departments filled in, since my scripts in Project 2 read those fields.
+I created the employees with job titles and departments filled in, since my Project 2 scripts use those fields. These are the groups I set up:
 
 | Group | Purpose | Members |
 | --- | --- | --- |
 | SG-Office | Office staff | Office manager |
 | SG-Operations | PMs and engineers | Project managers, project engineer, assistant PM |
 | SG-Field | Superintendents and crew | Superintendents, carpenter |
-| SG-IT | IT staff | IT specialist (everyday account) |
+| SG-IT | IT staff | IT specialist's everyday account |
 | SG-Licensed-BusinessPremium | Licensing | Every licensed employee |
 
-**Problem:** The guide I was following said to assign the license to the group in the Entra admin center, but that option wasn't there.
-**Cause:** Since September 2024, license assignment has moved to the Microsoft 365 admin center; the Entra page is now read-only.
-**Fix:** Assigned Business Premium to `SG-Licensed-BusinessPremium` from **Billing > Licenses > Groups** in the M365 admin center. After a short processing delay, every member showed the license as **Inherited** rather than Direct.
+The guide I was using said to assign the license to a group from the Entra admin center, but the option wasn't there. It turns out license assignment moved to the Microsoft 365 admin center in September 2024, and the Entra page is read-only now. I assigned Business Premium to `SG-Licensed-BusinessPremium` under Billing > Licenses > Groups, and after a few minutes every member showed the license as "Inherited" instead of "Direct."
 
 ![License inherited from group](images/license-inherited.png)
 
-**Why it matters:** licensing is driven by membership. Add a new hire to the group and they're licensed automatically; remove them and the license is freed. Nobody gets forgotten and no license is wasted.
+With this setup, adding a new hire to the group licenses them automatically, and removing someone frees the license. One thing I learned is that group licensing doesn't work through nested groups, so each person is added directly to the license group as well as their role group.
 
-**Design note:** group-based licensing doesn't pass through nested groups, so each user is added to the license group directly rather than nesting the role groups inside it. Each person sits in two groups: one for their role, one for licensing.
+## Separate admin accounts
 
-## 3. Least-privilege admin accounts
+The IT specialist has two accounts. The everyday account has a license and no admin roles, and is used for email and Teams. The admin account has no license (so no mailbox) and only the roles it needs: User Administrator and License Administrator, plus Intune Administrator later in Project 3.
 
-The IT specialist has **two accounts**:
+The point is to limit the damage if the everyday account gets phished. An attacker would get one mailbox, but not the ability to reset passwords, create accounts, or change security settings. And since the admin account has no mailbox, there's nothing for a phishing email to land in.
 
-| Account | Roles | License | Used for |
-| --- | --- | --- | --- |
-| Everyday account | None | Yes | Email, Teams, normal work |
-| Admin account | User Admin, License Admin (later Intune Admin) | **No** | Admin work only |
-
-If the everyday account is phished, the attacker gets one user's mailbox, not the ability to create backdoor accounts, reset passwords, or change security policies. Splitting accounts **limits the blast radius**. The admin account has no mailbox, so there's nothing for a phishing email to land in.
-
-I verified the restrictions by signing in as the admin account:
-
-- ✅ Resetting a regular user's password: allowed
-- ❌ Resetting a Global Administrator's password: blocked
-- ❌ Billing and most admin areas: hidden
+I tested the admin account to make sure the limits actually worked. It could reset a regular user's password, but it couldn't reset a Global Administrator's password, and Billing and most admin areas were hidden.
 
 ![Admin account resetting a user password](images/admin-password-reset.png)
 ![Admin account with restricted menu](images/admin-limited-menu.png)
 
-Roles were added only when a task required them. The Intune Administrator role was added in Project 3 for Autopilot device imports.
+## Break-glass account
 
-## 4. Break-glass emergency account
+I made a cloud-only emergency Global Administrator account on the `onmicrosoft.com` domain. It's there so the company can still get in if something goes wrong, like a bad Conditional Access policy, an admin leaving, or the main admin accounts getting compromised.
 
-I created a cloud-only emergency Global Administrator on the `onmicrosoft.com` domain. It exists so the company is never fully locked out, whether because of a bad Conditional Access policy, a departed or unreachable admin, compromised admin accounts, or an outside sign-in dependency failing.
+It isn't tied to a person's name, has no license or mailbox, uses a long passphrase stored separately, and is excluded from my Conditional Access policies so my own mistakes can't lock it out. It still has MFA, because Microsoft now requires MFA on admin portals for every account. In the lab I used Authenticator; in a real company it would be hardware security keys kept in separate safe places, so one lost phone can't lock out both my account and the emergency one. Sign-ins to it should also trigger an alert, since nobody should be using it day to day.
 
-- Not tied to any person's name, so it survives staff turnover
-- No license and no mailbox
-- Long passphrase stored separately
-- Excluded from my own Conditional Access policies, so my mistakes can't lock it out
-- **Still has MFA:** Microsoft now enforces MFA on admin portals for every account, including break-glass. Microsoft recommends FIDO2 security keys stored in separate secure locations; in the lab I used Authenticator.
+Registering Authenticator from inside the app kept looping back to the sign-in screen. Starting from `mysignins.microsoft.com` on the computer and scanning the QR code worked.
 
-**Problem:** registering Authenticator from inside the app looped back to the sign-in screen repeatedly.
-**Fix:** started registration from `mysignins.microsoft.com` on the computer and scanned the QR code with the app instead.
+The tenant ended up with exactly two Global Administrators: mine and break-glass.
 
-The tenant has exactly two Global Administrators: my own account and break-glass.
+## Conditional Access
 
-**In production:** break-glass MFA would live on hardware keys locked away, not on the same phone as my own MFA, because one lost phone would otherwise lock out both. Sign-ins to the account would also trigger an alert, since any use is either a real emergency or an attacker.
-
-## 5. Conditional Access
-
-I disabled security defaults, which can't run alongside Conditional Access, and created two policies, both in **report-only** mode first:
+I turned off security defaults (they can't run alongside Conditional Access) and created two policies, both in report-only mode to start:
 
 | Policy | Users | Condition | Action |
 | --- | --- | --- | --- |
-| CA01 - Require MFA - All users | All users, excluding break-glass | All cloud apps | Require MFA |
-| CA02 - Block legacy authentication | All users, excluding break-glass | Exchange ActiveSync and Other clients | Block |
+| CA01 - Require MFA - All users | All users except break-glass | All cloud apps | Require MFA |
+| CA02 - Block legacy authentication | All users except break-glass | Exchange ActiveSync and other clients | Block |
 
-Report-only results for a test sign-in were exactly as intended: CA01 **Success** (MFA completed) and CA02 **Not applied** (a browser sign-in isn't a legacy client).
+On a test sign-in, the report-only results came back the way I wanted: CA01 showed Success since MFA was completed, and CA02 showed Not applied since a browser isn't a legacy client.
 
 ![Report-only results](images/ca-report-only.png)
 
-I then switched both policies to **On** and signed in as a test user. The failed attempts (wrong password) showed CA as **Not applied**, because Conditional Access only runs after the password is verified. The successful sign-in showed CA01 **Success** on the enforced Conditional Access tab.
+After that I switched both policies on and signed in as a test user. The attempts where I typed the wrong password showed Conditional Access as Not applied, because it only runs after the password checks out. The successful sign-in showed CA01 as Success.
 
 ![Enforced Conditional Access sign-in](images/ca-enforced.png)
 
-**Notes:**
-- Turning off security defaults leaves a brief gap where MFA isn't required. Do it off-hours with the policies prepared in advance.
-- Microsoft has already largely disabled legacy authentication in Exchange Online, so CA02 is defense in depth.
-- **In production** I'd roll out new or risky policies with a pilot group first: IT plus a few representative users, keeping critical roles like superintendents mid-project out of the first wave, while report-only shows the impact on everyone else.
+A few things I'd do differently in a real company. Turning off security defaults leaves a short window with no MFA requirement, so I'd do it after hours with the policies ready to go. For riskier policies, I'd start with a pilot group of IT and a few users, and leave out people like superintendents in the middle of a job. Also, Microsoft has mostly shut off legacy authentication in Exchange Online already, so CA02 is more of a backup layer.
 
-## 6. Exchange and Teams
+## Exchange and Teams
 
-**Shared mailboxes:** `office@` (office staff) and `jobsite-maple@` (PM and superintendent). Shared mailboxes under 50 GB need no license.
+I made two shared mailboxes: `office@` for office staff and `jobsite-maple@` for the PM and superintendent. Shared mailboxes under 50 GB don't need a license.
 
-**Teams:** a private **Maple St Jobsite** team created from the admin center, with the PM and superintendent as owners and the field crew as members. IT is not a member. A **Daily Reports** channel holds the crew's updates.
+I also created a private Maple St Jobsite team from the admin center, with the PM and superintendent as owners and the field crew as members, plus a Daily Reports channel. IT isn't a member.
 
 ![Shared mailbox members](images/shared-mailbox.png)
 ![Daily Reports channel](images/teams-daily-reports.png)
 
-**When to use which:**
-- **Shared mailbox:** communication with people *outside* the company (inspectors, suppliers, the city) who email the jobsite address.
-- **Teams channel:** internal conversation and daily updates among the crew.
+The way I think about it, the shared mailbox is for people outside the company (inspectors, suppliers, the city) who email the jobsite, and the Teams channel is for the crew talking among themselves. The team has two owners so it isn't stuck if one person leaves, and the owners are the people running the job so IT doesn't have to handle every membership request.
 
-**Ownership:** every team has two owners so it doesn't become orphaned if one person leaves, and the owners are the business people running the job, not IT, so IT doesn't become the bottleneck for every membership request.
+When I tried to sign in to Teams as the PM, I got "email unrecognized." I was on the consumer version of Teams (teams.live.com), which doesn't take work accounts. Signing in at `teams.microsoft.com` fixed it.
 
-**Problem:** signing in to Teams as the PM failed with "email unrecognized."
-**Cause:** I was on the consumer version of Teams (teams.live.com), which doesn't accept work accounts.
-**Fix:** signed in at `teams.microsoft.com`.
+## End-to-end test
 
-## 7. End-to-end test
-
-I created a new user, added them to their role group and `SG-Licensed-BusinessPremium`, and confirmed they automatically received the license and were required to register MFA at first sign-in.
+To check the whole setup, I created a new user, added them to their role group and `SG-Licensed-BusinessPremium`, and confirmed they got the license automatically and had to set up MFA on first sign-in.
 
 <!-- TODO: confirm which user you used for this test (Lauren Harris?) and add a screenshot. -->
 
-## Lessons
+## What I learned
 
-- License management moved from Entra to the M365 admin center; admin portals change often, so verify against current documentation.
-- Authentication (who you are) and authorization (what you can do) are separate checks.
-- Report-only mode and a break-glass account are what make Conditional Access changes safe.
+Microsoft moves things around in the admin portals a lot, so I had to check current documentation instead of trusting older guides. I also got a clearer picture of authentication (proving who you are) versus authorization (what you're allowed to do), since the Conditional Access logs showed them as separate steps. And report-only mode plus a break-glass account made it a lot less scary to turn on MFA for everyone.

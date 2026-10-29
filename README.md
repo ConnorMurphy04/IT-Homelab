@@ -1,33 +1,33 @@
 # IT Homelab: Ridgeline Builders
 
-A hands-on lab where I built and ran the IT environment for a fictional construction company, **Ridgeline Builders**: one office, two jobsites, about a dozen employees. Each project maps to the day-to-day work of an IT Support Specialist: identity and access, automation, device deployment, jobsite networking, documentation, and backups.
+This is a homelab where I built and ran the IT environment for a made-up construction company called Ridgeline Builders. The company has one office, two jobsites, and about a dozen employees. Each project lines up with the day-to-day work of an IT support role: managing accounts and access, scripting repetitive tasks, deploying laptops, and setting up jobsite networks.
 
-Everything here was built in a real Microsoft 365 Business Premium tenant (trial), a Windows 11 VM, and Cisco Packet Tracer. Every project README documents not just what I built, but what broke and how I tracked down the cause.
+I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 11 virtual machine, and Cisco Packet Tracer. Each project's README covers what I set up, what broke along the way, and how I tracked down the cause.
 
 ## Projects
 
 | # | Project | What it covers | Status |
 | --- | --- | --- | --- |
-| 1 | [Microsoft 365 / Entra ID tenant](01-m365-tenant/) | Users, group-based licensing, least-privilege admin roles, break-glass account, Conditional Access MFA, Exchange, Teams | ✅ Complete |
-| 2 | [PowerShell automation](02-automation/) | Onboarding, offboarding, stale-account, MFA-gap, and group-audit scripts using Microsoft Graph | ✅ Complete |
-| 3 | [Intune and Autopilot](03-intune-autopilot/) | Device enrollment, compliance, BitLocker, update rings, app deployment, zero-touch Autopilot, asset inventory | ✅ Complete |
-| 4 | [Jobsite trailer network](04-jobsite-network/) | VLAN segmentation, DHCP, guest isolation, NAT, site-to-site IPsec VPN in Packet Tracer | ✅ Complete |
+| 1 | [Microsoft 365 / Entra ID tenant](01-m365-tenant/) | Users, group-based licensing, admin roles, break-glass account, Conditional Access MFA, Exchange, Teams | Done |
+| 2 | [PowerShell automation](02-automation/) | Onboarding, offboarding, stale accounts, MFA gaps, and group audits with Microsoft Graph | Done |
+| 3 | [Intune and Autopilot](03-intune-autopilot/) | Device enrollment, compliance, BitLocker, update rings, app deployment, Autopilot, asset inventory | Done |
+| 4 | [Jobsite trailer network](04-jobsite-network/) | VLANs, DHCP, guest isolation, NAT, and a site-to-site VPN in Packet Tracer | Done |
 | 5 | Documentation and ticketing | Help desk queue, runbooks, escalation template | Planned |
-| 6 | Backup and restore verification | Veeam Agent, M365 recovery tests, verification log | Planned |
+| 6 | Backup and restore testing | Veeam Agent, Microsoft 365 recovery tests | Planned |
 
-## Highlights
+## Some things I'm proud of
 
-- **Group-based licensing and least privilege:** licenses follow group membership; IT works from a separate, unlicensed admin account with only the roles each task requires.
-- **Conditional Access rolled out safely:** MFA and legacy-auth blocking piloted in report-only mode, with a break-glass account excluded from my own policies.
-- **Five PowerShell scripts** that are idempotent, support `-WhatIf` dry runs, and log what they did.
-- **Zero-touch Windows deployment:** a laptop registered in Autopilot configures itself when a new hire signs in.
-- **Three full troubleshooting write-ups** (BitLocker compliance, Autopilot profile delivery, and a site-to-site VPN) traced from symptom to root cause with evidence.
+- Licenses are assigned by group membership, and IT work happens from a separate admin account with only the roles it needs.
+- I rolled out MFA with Conditional Access in report-only mode first, with an emergency account excluded so a bad policy couldn't lock everyone out.
+- Five PowerShell scripts that are safe to rerun, support `-WhatIf` dry runs, and log what they did.
+- A Windows laptop registered in Autopilot sets itself up when a new hire signs in.
+- Three troubleshooting write-ups (BitLocker compliance, Autopilot, and the VPN) where I followed the evidence to the actual cause.
 
-## Environment
+## Tools
 
 - Microsoft 365 Business Premium (Entra ID P1, Intune, Exchange Online, Teams)
-- PowerShell 7 with the Microsoft Graph and ExchangeOnlineManagement modules, on macOS
-- Windows 11 Pro (Arm64) in VMware Fusion on an Apple Silicon (M3) Mac
+- PowerShell 7 with the Microsoft Graph and Exchange Online modules, on macOS
+- Windows 11 Pro (Arm64) in VMware Fusion on an M3 Mac
 - Cisco Packet Tracer
 
-> All names, users, and devices are fictional. Domains in this repo are replaced with `ridgeline.example`, and no credentials are stored here.
+All names, users, and devices are fictional, and no credentials are stored in this repo.

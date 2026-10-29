@@ -1,113 +1,90 @@
 # Project 2: PowerShell Automation with Microsoft Graph
 
-**Goal:** Automate Ridgeline's repetitive identity work so it's fast, consistent, and doesn't depend on one person remembering every step.
-
-**What it shows:** onboarding and offboarding, checks on stale accounts and MFA enrollment, and standardized workflows that reduce single-point-of-failure risk.
-
-## Scripts
+In this project I wrote PowerShell scripts to handle Ridgeline's repetitive account work, so onboarding and offboarding happen the same way every time and don't depend on someone remembering every step.
 
 | Script | What it does |
 | --- | --- |
-| `New-RidgelineUser.ps1` | Creates users from an HR-style CSV and adds them to their role group and license group |
-| `Remove-RidgelineUser.ps1` | Offboards a user securely: blocks sign-in, revokes sessions, converts the mailbox to shared, removes group memberships |
-| `Get-StaleAccounts.ps1` | Reports enabled accounts with no sign-in for N days |
-| `Get-MfaGaps.ps1` | Reports users without MFA registered |
-| `Get-GroupAudit.ps1` | Lists every member of every `SG-` group for access reviews |
+| `New-RidgelineUser.ps1` | Creates users from a CSV and adds them to their role group and the license group |
+| `Remove-RidgelineUser.ps1` | Offboards a user: blocks sign-in, signs them out everywhere, converts the mailbox to shared, removes group memberships |
+| `Get-StaleAccounts.ps1` | Lists enabled accounts with no sign-in for a set number of days |
+| `Get-MfaGaps.ps1` | Lists users who haven't registered MFA |
+| `Get-GroupAudit.ps1` | Lists every member of every `SG-` group |
 
 ## Setup
 
-- **PowerShell 7** on macOS, with VS Code and the PowerShell extension
-- Modules: `Microsoft.Graph` and `ExchangeOnlineManagement` (the older `MSOnline` and `AzureAD` modules are retired)
-- Connected with only the scopes these scripts need:
+I used PowerShell 7 on macOS with VS Code, and the `Microsoft.Graph` and `ExchangeOnlineManagement` modules. (The older `MSOnline` and `AzureAD` modules are retired.) I connect with only the permissions the scripts need:
 
 ```powershell
 Connect-MgGraph -Scopes "User.ReadWrite.All","Group.ReadWrite.All","Directory.ReadWrite.All","AuditLog.Read.All","UserAuthenticationMethod.Read.All"
 ```
 
-The first connection in a tenant must be made by a Global Admin to consent to the Graph PowerShell app for the organization. After that, the scripts can run under the IT admin account, which can only do what its admin roles allow: a script can't exceed the permissions of the account running it.
+The first time anyone connects in a tenant, a Global Admin has to approve the Graph PowerShell app for the organization. After that the scripts can run under the IT admin account, which is limited to whatever its admin roles allow.
 
 ```
 02-automation/
 ├── scripts/   # the .ps1 files
-├── data/      # input CSVs (sample data only)
-├── reports/   # output CSVs (not committed: contain user names)
+├── data/      # input CSVs (sample data)
+├── reports/   # output CSVs (not committed, they contain user names)
 └── logs/      # transcripts (not committed)
 ```
 
-All file paths use `$PSScriptRoot`, so the scripts work no matter which folder they're run from.
+The scripts build their file paths from `$PSScriptRoot`, so they work no matter which folder you run them from.
 
-## 1. Onboarding: `New-RidgelineUser.ps1`
+## Onboarding
 
-Reads a CSV of new hires, creates each account with a temporary password that must be changed at first sign-in, and adds the user to their role group and to `SG-Licensed-BusinessPremium`, which licenses them automatically.
+`New-RidgelineUser.ps1` reads a CSV of new hires, creates each account with a temporary password that has to be changed at first sign-in, and adds the user to their role group and `SG-Licensed-BusinessPremium` so they get licensed automatically.
 
-**Design choices:**
-- **`-WhatIf` dry run:** shows exactly what would be created without changing anything.
-- **Idempotent:** skips users who already exist, so it's safe to run twice.
-- **Logged:** `Start-Transcript` records every run.
+I added a few things to make it safer to use. It supports `-WhatIf`, so you can see what it would do before it does anything. It skips anyone who already exists, so running it twice doesn't create duplicates. And every run is logged with `Start-Transcript`. In the screenshot, the second run skips both users with warnings:
 
-The second run of the same CSV skipped both users with warnings instead of creating duplicates:
+![Onboarding run and rerun](images/onboarding-idempotent.png)
 
-![Onboarding run and idempotent rerun](images/onboarding-idempotent.png)
+One problem I noticed: the script prints each temporary password, which means the transcript log saves it too. That's okay for a lab, but in a real company the password should go to the manager securely, or be replaced with a Temporary Access Pass, and never end up in a log.
 
-**Security note:** the script prints each temporary password, which means the transcript log captures it too. That's acceptable in a lab, but in production the password would be delivered securely to the manager, or replaced with a Temporary Access Pass, and never written to a log.
+## Offboarding
 
-## 2. Offboarding: `Remove-RidgelineUser.ps1`
+`Remove-RidgelineUser.ps1` does its steps in a specific order:
 
-The steps run in a deliberate order:
+1. Block sign-in and revoke sessions. Disabling an account doesn't sign out a phone that's already logged in, but `Revoke-MgUserSignInSession` does.
+2. Convert the mailbox to shared and give the manager access. This has to happen before licenses are removed, because removing the license first means the mailbox gets deleted after a grace period.
+3. Remove the user from all groups, which also frees up the license.
+4. Set the department field to `OFFBOARDED <date>` so the next admin can see what happened.
 
-1. **Block sign-in and revoke sessions.** Disabling an account doesn't log out a phone that's already signed in; `Revoke-MgUserSignInSession` does.
-2. **Convert the mailbox to shared and give the manager access**, *before* removing licenses. If the license is removed first, the mailbox data is deleted after a grace period. Converting first preserves it.
-3. **Remove all group memberships**, which also frees the group-based license.
-4. **Stamp the department field** with `OFFBOARDED <date>` so the next admin knows what happened.
-
-The account is disabled, not deleted, so it's easy to reverse: re-enable it, convert the mailbox back, and re-add groups.
+The account gets disabled instead of deleted, so it's easy to bring back if needed.
 
 ![Offboarding run](images/offboarding-run.png)
 ![User offboarded](images/offboarding-result.png)
 ![Sign-in blocked](images/offboarding-blocked.png)
 
-**Problems I hit:**
-- **"Successful" run, but nothing changed.** I had rerun the command with `-WhatIf` still on the end. A dry run prints output with no errors, so it *looks* successful. The clue was that no log file was created. Lesson: verify the result, don't trust the absence of errors.
-- **"Couldn't convert the mailbox, it is already Shared"** on a later run. This was a warning, not an error: the earlier run had worked, and the admin center was showing a cached page. Querying Graph directly confirmed the account was disabled and stamped.
+I ran into two problems here. The first time, the script seemed to run fine but nothing actually changed. I had reused the previous command, which still had `-WhatIf` on the end, so it was only a dry run. The giveaway was that no log file got created. Later, a run gave me a warning that the mailbox was "already Shared." That just meant the earlier real run had worked and the admin center was showing an old cached page. Checking the account directly with `Get-MgUser` confirmed it was disabled.
 
-## 3. Stale accounts: `Get-StaleAccounts.ps1`
+## Stale accounts
 
-Exports enabled accounts that haven't signed in within N days (default 90). New accounts under 14 days old are skipped so new hires aren't flagged on their first day.
+`Get-StaleAccounts.ps1` exports enabled accounts that haven't signed in within a set number of days (90 by default). Accounts less than 14 days old are skipped so new hires don't get flagged on day one.
 
-To test it in a brand-new tenant, I ran it with `-Days 0` and the 14-day filter temporarily disabled. Every enabled account appeared, and the offboarded (disabled) user correctly did not.
+Since my tenant was brand new, I tested it with `-Days 0` and the 14-day filter turned off. Every enabled account showed up, and the offboarded user didn't, which is what I expected.
 
 ![Stale account report](images/stale-accounts.png)
 
-**Notes:**
-- **Debugging an empty report:** at first the CSV stayed empty. I tested each stage of the pipeline separately and found my `#` had commented out only the end of the line, leaving the 14-day filter active.
-- The **LastSignIn** column was blank even for users who had signed in. Sign-in activity data lags, so a brand-new tenant shows little of it.
-- **In production** I'd exclude the break-glass account, which will always look stale by design and should be watched with a sign-in alert instead.
+At first the report came back empty. I checked each part of the pipeline separately and found that my `#` had only commented out the end of the line, so the 14-day filter was still running. I also noticed the LastSignIn column was blank even for users who had signed in, since sign-in data takes a while to show up in a new tenant. In a real setup I'd leave the break-glass account out of this report, since it's supposed to look unused, and watch it with an alert instead.
 
-## 4. MFA gaps: `Get-MfaGaps.ps1`
+## MFA gaps
 
-Uses Microsoft's authentication-methods registration report to list users without MFA.
+`Get-MfaGaps.ps1` uses Microsoft's MFA registration report to list users without MFA. The report came back empty at first because Microsoft builds it in the background and it can take up to a day in a new tenant. An empty file could mean everyone has MFA or that there's no data yet, so I changed the script to warn and stop when the report has no data, and to print a summary of how many users it checked.
 
-**Problem:** the report returned nothing. Microsoft builds it in the background, and in a new tenant it can take up to a day to populate. An empty file was ambiguous: did it mean "everyone has MFA" or "no data"? I changed the script to:
-- warn and stop when the report returns no data
-- print a summary ("X users checked, Y without MFA")
-
-For a real-time answer, I also checked each user's registered methods directly, one Graph call per user:
+For a real-time answer, I also checked each user's registered sign-in methods directly:
 
 ![Live MFA check](images/mfa-live-check.png)
 
 <!-- TODO: this result shows the admin account with 0 MFA methods. Re-run it and either document fixing it or explain the result. -->
 
-**Trade-off:** the report is fast and scales to thousands of users but is cached; the per-user lookup is always current but makes one call per user. I'd use the report for a weekly review and the live lookup for one user on the phone.
+The report is faster and works well for a weekly check across lots of users, but it's cached. Checking each user directly is always up to date but makes one request per user, so it's better for checking one person, like someone on the phone with the help desk.
 
-## 5. Group audit: `Get-GroupAudit.ps1`
+## Group audit
 
-Lists every member of every `SG-` group to a CSV. I wrote it after an app deployment in Project 3 failed because a superintendent had never been added to `SG-Field`. A monthly access review catches mistakes like that before they become tickets.
+`Get-GroupAudit.ps1` exports every member of every `SG-` group to a CSV. I wrote it after an app deployment in Project 3 failed because a superintendent was never added to `SG-Field`. Running this monthly would catch mistakes like that.
 
 ![Group audit](images/group-audit.png)
 
-## Lessons
+## What I learned
 
-- A dry run and a quiet success look the same. Build in clear output and verify against the source of truth.
-- Relative paths depend on where you run a script from; `$PSScriptRoot` makes them reliable.
-- Reports built on Microsoft's cached data lag in new tenants. Know which data is live and which isn't.
-- When a command complains about an empty value, check whether the variable was ever set.
+A dry run and a successful run can look almost the same, so it's worth having scripts print a clear summary and then checking the result yourself. Relative paths break depending on where you run a script from, which `$PSScriptRoot` fixes. Microsoft's report data lags in a new tenant, so it helps to know which data is live and which isn't. And when a command complains about an empty value, the first thing to check is whether that variable was ever actually set.
