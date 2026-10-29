@@ -1,0 +1,19 @@
+# Credentials: never commit
+lab-credentials*
+*credentials*
+*.pfx
+*.key
+
+# Script output: contains user names, and transcripts can contain passwords
+**/logs/
+**/reports/
+*.log
+
+# Raw exports from Intune / Entra (real domain and device IDs)
+*export*.csv
+DevicesWithInventory*.csv
+AutopilotHWID*.csv
+
+# macOS and editor clutter
+.DS_Store
+.vscode/
