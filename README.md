@@ -12,7 +12,7 @@ I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 1
 | 2 | [PowerShell automation](02-automation/) | Onboarding, offboarding, stale accounts, MFA gaps, and group audits with Microsoft Graph | Done |
 | 3 | [Intune and Autopilot](03-intune-autopilot/) | Device enrollment, compliance, BitLocker, update rings, app deployment, Autopilot, asset inventory | Done |
 | 4 | [Jobsite trailer network](04-jobsite-network/) | VLANs, DHCP, guest isolation, NAT, and a site-to-site VPN in Packet Tracer | Done |
-| 5 | Documentation and ticketing | Help desk queue, runbooks, escalation template | Planned |
+| 5 | [Help desk and documentation](05-help-desk/) | Jira Service Management queue, SLAs, tickets from the lab, problem records, runbooks | In progress |
 | 6 | Backup and restore testing | Veeam Agent, Microsoft 365 recovery tests | Planned |
 
 ## Some things I'm proud of
@@ -29,5 +29,6 @@ I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 1
 - PowerShell 7 with the Microsoft Graph and Exchange Online modules, on macOS
 - Windows 11 Pro (Arm64) in VMware Fusion on an M3 Mac
 - Cisco Packet Tracer
+- Jira Service Management
 
 All names, users, and devices are fictional, and no credentials are stored in this repo.
