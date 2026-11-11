@@ -83,8 +83,6 @@ When I tried to sign in to Teams as the PM, I got "email unrecognized." I was on
 
 To check the whole setup, I created a new user, added them to their role group and `SG-Licensed-BusinessPremium`, and confirmed they got the license automatically and had to set up MFA on first sign-in.
 
-<!-- TODO: confirm which user you used for this test (Lauren Harris?) and add a screenshot. -->
-
 ## What I learned
 
 Microsoft moves things around in the admin portals a lot, so I had to check current documentation instead of trusting older guides. I also got a clearer picture of authentication (proving who you are) versus authorization (what you're allowed to do), since the Conditional Access logs showed them as separate steps. And report-only mode plus a break-glass account made it a lot less scary to turn on MFA for everyone.

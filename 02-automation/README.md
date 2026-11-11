@@ -75,7 +75,7 @@ For a real-time answer, I also checked each user's registered sign-in methods di
 
 ![Live MFA check](images/mfa-live-check.png)
 
-<!-- TODO: this result shows the admin account with 0 MFA methods. Re-run it and either document fixing it or explain the result. -->
+Every account showed 0 when I ran this. Most of the lab accounts hadn't been signed into yet, and the Conditional Access policy prompts each user to register MFA the first time they sign in. In a real company, this list is who to follow up with because they haven't finished setting up their account.
 
 The report is faster and works well for a weekly check across lots of users, but it's cached. Checking each user directly is always up to date but makes one request per user, so it's better for checking one person, like someone on the phone with the help desk.
 

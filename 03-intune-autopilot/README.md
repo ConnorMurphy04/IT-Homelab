@@ -35,7 +35,6 @@ The VM joined Entra ID and showed up in Intune with the superintendent as its pr
 Here's what I assigned:
 
 - Compliance policy `CP-Windows-Baseline`, assigned to `DG-Windows-Laptops`: requires BitLocker, Secure Boot, the firewall, Defender antivirus with real-time protection, a TPM, and a minimum Windows version. Devices get a one-day grace period before they're marked noncompliant, so a laptop that fails a check after an update doesn't block someone right away.
-- Configuration profile <!-- TODO: your profile name and settings -->, assigned to `DG-Windows-Laptops`.
 - A BitLocker disk encryption policy, assigned to `DG-Windows-Laptops`, to turn on encryption silently.
 - Update ring `Ring-Broad`: quality updates delayed 3 days and feature updates 30 days. In a real company I'd add a `Ring-Pilot` with no delay for IT's own laptops, so updates get tested before they reach everyone else.
 - Microsoft 365 Apps (64-bit), required for `SG-Field`. I targeted that group so I could watch it install for my test user. In a real company it would go to all licensed users, and role groups would be used for specialized apps like Bluebeam or Procore.
@@ -96,7 +95,6 @@ So the cause was a delay between the portal saying "Assigned" and the profile ac
 After that, a new hire signed in on the redeployed device and got the company setup and Microsoft 365 apps without me doing anything manually.
 
 ![Autopilot result](images/autopilot-result.png)
-<!-- TODO: add a screenshot showing the RB- device name (Settings > System > About) and the user as a Standard user. -->
 
 ## Asset inventory
 

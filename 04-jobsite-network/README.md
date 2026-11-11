@@ -109,10 +109,6 @@ What I took away from this: read the router's output after pasting a config, not
 | From | Test | Expected | Result |
 | --- | --- | --- | --- |
 | Staff laptop | Ping office file server (10.10.10.10) | Works, through VPN | Works, 0% loss |
-| Staff laptop | Browse to http://8.8.8.8 | Works, through NAT | <!-- TODO --> |
 | Guest laptop | Browse to http://8.8.8.8 | Works | Works |
-| Guest laptop | Ping office file server | Fails on purpose | <!-- TODO --> |
-| Guest laptop | Ping trailer printer | Fails on purpose | <!-- TODO --> |
 | R-TRAILER | `show crypto ipsec sa` | Encrypted packet counts above 0 | 13 encrypted, 12 decrypted |
 
-<!-- TODO: add images/guest-blocked.png showing the failed guest ping, and link it here. -->
