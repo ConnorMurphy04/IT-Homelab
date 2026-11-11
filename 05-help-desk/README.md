@@ -1,6 +1,6 @@
 # Project 5: Help Desk and Documentation
 
-This project is still in progress.
+This project is almost finished; one problem record is left to create in Jira.
 
 For this project I set up a help desk in Jira Service Management and ran the problems from my earlier projects through it as real tickets. The goal is to practice the part of IT support that happens around the technical fix: logging the request, keeping notes another tech could follow, explaining the fix to the user in plain language, and spotting patterns behind repeat issues.
 
@@ -141,8 +141,19 @@ Adam is the manager, not the new hire, so the reply tells him what he needs to d
 
 ![RIT-1 reply](images/rit1-reply.png)
 
+## Runbooks
+
+A big part of help desk work is making sure the next person can do the same job without having to ask. I wrote runbooks for the tasks that came up most in this lab, based on what actually happened when I did them, including the mistakes:
+
+| Runbook | Covers |
+| --- | --- |
+| [Onboarding](runbooks/onboarding.md) | Creating a new hire's account with the onboarding script, licensing, laptop, and first-day sign-in |
+| [Offboarding](runbooks/offboarding.md) | Cutting off access on the last day without losing mailbox data, and collecting equipment |
+| [Jobsite setup](runbooks/jobsite-setup.md) | Building a trailer network with separate staff, device, and guest Wi-Fi, plus sign-off tests |
+| [Wi-Fi troubleshooting](runbooks/troubleshooting-wifi.md) | "Connected but nothing works," starting from the device's IP address |
+| [VPN troubleshooting](runbooks/troubleshooting-vpn.md) | A jobsite that can't reach the office, from the internet link up to the tunnel |
+| [Escalation template](runbooks/escalation-template.md) | What to include when passing an issue to a vendor or the IT Director, with an example |
+
 ## Still to do
 
 - Create a problem record for users being missed from groups during manual onboarding, linked to RIT-4, with the onboarding script and monthly group audit as the permanent fix
-- Write runbooks for onboarding, offboarding, jobsite setup, and common troubleshooting
-- Write an escalation template for passing issues to vendors or the IT director
