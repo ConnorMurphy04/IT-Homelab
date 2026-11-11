@@ -13,7 +13,7 @@ I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 1
 | 3 | [Intune and Autopilot](03-intune-autopilot/) | Device enrollment, compliance, BitLocker, update rings, app deployment, Autopilot, asset inventory | Done |
 | 4 | [Jobsite trailer network](04-jobsite-network/) | VLANs, DHCP, guest isolation, NAT, and a site-to-site VPN in Packet Tracer | Done |
 | 5 | [Help desk and documentation](05-help-desk/) | Jira Service Management queue, SLAs, tickets from the lab, problem records, runbooks | Done |
-| 6 | Backup and restore testing | Veeam Agent, Microsoft 365 recovery tests | Planned |
+| 6 | [Backup and restore testing](06-backup/) | Deleted user and OneDrive version restores, laptop backup and timed restore, verification log | Done |
 
 ## Some things I'm proud of
 
@@ -22,6 +22,7 @@ I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 1
 - Five PowerShell scripts that are safe to rerun, support `-WhatIf` dry runs, and log what they did.
 - A Windows laptop registered in Autopilot sets itself up when a new hire signs in.
 - Three troubleshooting write-ups (BitLocker compliance, Autopilot, and the VPN) where I followed the evidence to the actual cause.
+- Backups I actually restored from and timed, including checking vendor support first and switching tools when Veeam turned out not to support Arm.
 
 ## Tools
 
@@ -30,5 +31,6 @@ I built everything in a Microsoft 365 Business Premium trial tenant, a Windows 1
 - Windows 11 Pro (Arm64) in VMware Fusion on an M3 Mac
 - Cisco Packet Tracer
 - Jira Service Management
+- Windows Backup and Restore
 
 All names, users, and devices are fictional, and no credentials are stored in this repo.
