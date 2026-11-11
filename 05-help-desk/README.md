@@ -1,7 +1,5 @@
 # Project 5: Help Desk and Documentation
 
-This project is almost finished; one problem record is left to create in Jira.
-
 For this project I set up a help desk in Jira Service Management and ran the problems from my earlier projects through it as real tickets. The goal is to practice the part of IT support that happens around the technical fix: logging the request, keeping notes another tech could follow, explaining the fix to the user in plain language, and spotting patterns behind repeat issues.
 
 ## Setup
@@ -141,6 +139,18 @@ Adam is the manager, not the new hire, so the reply tells him what he needs to d
 
 ![RIT-1 reply](images/rit1-reply.png)
 
+## Problem record: users missed from groups
+
+Each incident above was fixed on its own, but RIT-4 had a cause that would keep producing new tickets: Gina was missing from her role group because accounts set up by hand don't follow a checklist, and a step got missed. Licenses and app assignments depend on group membership, so every missed group means another user without apps or access.
+
+In IT service management, that's a problem rather than an incident. The incident fix for RIT-4 was adding Gina to her group. The problem fix is making sure nobody gets missed again. I logged it as RIT-9 and linked it to RIT-4.
+
+The permanent fix is two things I'd already built in Project 2: all onboarding goes through `New-RidgelineUser.ps1`, which adds the role and license groups automatically, and `Get-GroupAudit.ps1` runs monthly to catch anything that slips through.
+
+![Problem record](images/problem-record.png)
+![Linked to RIT-4](images/problem-linked-rit4.png)
+![Permanent fix](images/problem-fix-note.png)
+
 ## Runbooks
 
 A big part of help desk work is making sure the next person can do the same job without having to ask. I wrote runbooks for the tasks that came up most in this lab, based on what actually happened when I did them, including the mistakes:
@@ -153,7 +163,3 @@ A big part of help desk work is making sure the next person can do the same job 
 | [Wi-Fi troubleshooting](runbooks/troubleshooting-wifi.md) | "Connected but nothing works," starting from the device's IP address |
 | [VPN troubleshooting](runbooks/troubleshooting-vpn.md) | A jobsite that can't reach the office, from the internet link up to the tunnel |
 | [Escalation template](runbooks/escalation-template.md) | What to include when passing an issue to a vendor or the IT Director, with an example |
-
-## Still to do
-
-- Create a problem record for users being missed from groups during manual onboarding, linked to RIT-4, with the onboarding script and monthly group audit as the permanent fix
