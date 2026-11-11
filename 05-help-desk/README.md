@@ -33,7 +33,6 @@ I also turned on the template's automation that emails a feedback survey when a 
 
 Each ticket is a problem I actually ran into in Projects 1 through 4, logged under the employee who would have reported it.
 
-![Ticket queue](images/queue.png)
 
 | Key | Requester | Summary | Type |
 | --- | --- | --- | --- |
@@ -43,7 +42,10 @@ Each ticket is a problem I actually ran into in Projects 1 through 4, logged und
 | RIT-6 | Project manager | Can't sign into Teams, says "email not recognized" | Fix an account problem |
 | RIT-8 | Superintendent | Maple St trailer Wi-Fi down, crews can't upload daily reports | Report a system problem |
 
-I first logged the Wi-Fi outage as "Investigate a problem," then moved it. In IT service management, an incident is something broken right now that needs service restored, and a problem is the underlying cause behind one or more incidents. A jobsite losing Wi-Fi is an incident.
+All five tickets are resolved, and the open queue is empty. RIT-7 shows as canceled because it was my first attempt at the Wi-Fi ticket, which I logged as "Investigate a problem" and then replaced with RIT-8. In IT service management, an incident is something broken right now that needs service restored, and a problem is the underlying cause behind one or more incidents. A jobsite losing Wi-Fi is an incident.
+
+![Resolved queue](images/queue-resolved.png)
+![Empty open queue](images/queue-all-open-empty.png)
 
 ## Example: RIT-4, apps never installed
 
@@ -84,13 +86,63 @@ The reply to Gina:
 
 The reply follows a pattern I'm trying to use for every ticket: what happened, whether the user is affected, what happens next, and what to do if anything changes. It leaves out the technical details, since Gina doesn't need to know what PCR7 is to understand what's going on.
 
+The note I first posted in Jira had a typo ("PRC7") and skipped the step where I detached the installer ISO. Instead of rewriting it, I added a second internal note with the correction, so the ticket history stays accurate.
+
 ![RIT-5 SLA timers](images/rit5-sla.png)
-![RIT-5 internal note](images/rit5-internal-note.png)
+![RIT-5 reply and internal note](images/rit5-reply-and-note.png)
+
+## RIT-8: Maple St trailer Wi-Fi down
+
+This was the highest priority ticket, since a whole crew couldn't work.
+
+The internal note:
+
+> A guest laptop at the Maple St trailer showed an IP of 169.254.8.201. That's a self-assigned address, meaning DHCP never responded to the request. The wireless link had dropped, so DHCP never answered.
+>
+> Why did this happen? The SSID on AP-GUEST was named incorrectly, so the laptop couldn't find the network it was configured for.
+>
+> The fix: renamed the SSID, and the laptop rejoined, was assigned an address in 10.20.30.x, and was able to load http://8.8.8.8. Also worth noting, `show ip dhcp binding` showed a stale lease from before the SSIDs were named.
+
+The reply to Gina:
+
+> Hi Gina! Thanks for the request here. Good news, we discovered what the issue was and resolved it. Your crews are now back online, just have everybody refresh and/or restart their devices. No other actions are necessary.
+
+![RIT-8 reply](images/rit8-reply.png)
+
+## RIT-6: Teams sign-in
+
+This was a user education ticket more than a technical one.
+
+The internal note:
+
+> Priya submitted a request stating that Microsoft Teams sign-in was denying her access with the error "Email not recognized." I checked her URL and found that she was attempting to sign in at teams.live.com. This is the consumer, or "free," version of Teams, and it does not accept work accounts. I directed Priya to teams.microsoft.com, the business version of Teams, and she signed in successfully with her work email address.
+
+The reply to Priya:
+
+> Hi Priya! Thanks for the ticket. I see your work login is not allowing you access to teams.live.com. This is a free version of Teams. Ridgeline uses the business version at teams.microsoft.com. Go ahead and use your login at that link and you should be logged in successfully. Also, bookmark this page to ensure the right link every time. Let me know if you have any issues with that!
+
+I wanted the reply to fix the problem without making Priya feel like she'd made a mistake, and the bookmark tip is there so it doesn't happen again.
+
+![RIT-6 notes](images/rit6-notes.png)
+
+## RIT-1: New hires
+
+The office manager asked for two new hires to be ready for Monday. This ticket is where the onboarding script from Project 2 and Autopilot from Project 3 came together.
+
+The internal note:
+
+> Two new hires are being onboarded this upcoming Monday: Jordan Hayes (Carpenter, Field) and Maria Lopez (Assistant PM, Operations). I ran New-RidgelineUser.ps1 with -WhatIf first, then for real. Both new hires were added to their role groups and to SG-Licensed-BusinessPremium, so they were licensed automatically. Both were given a temporary password that they must change at first sign-in, and CA01 requires MFA setup at first sign-in. Jordan's laptop was deployed by Autopilot on his first sign-in.
+
+The reply to Adam:
+
+> Hi Adam, Jordan and Maria are all set up for Monday. I'll call you on Monday morning with their temporary passwords so you can hand them over in person. When they first sign in, they'll choose a new password and set up the Microsoft Authenticator app, so make sure they have their phones with them. Jordan's laptop will set itself up automatically when he signs in. If anyone gets stuck, just reply here and I'll help.
+
+Adam is the manager, not the new hire, so the reply tells him what he needs to do before Monday. The temporary passwords go to him by phone, not in the ticket, since anything written in a ticket or email can be read by whoever has access to it later.
+
+![RIT-1 reply](images/rit1-reply.png)
 
 ## Still to do
 
-- Work and resolve the rest of the tickets
-- Log a lost phone ticket and fix it in the tenant with a Temporary Access Pass
 - Create a problem record for users being missed from groups during manual onboarding, linked to RIT-4, with the onboarding script and monthly group audit as the permanent fix
 - Write runbooks for onboarding, offboarding, jobsite setup, and common troubleshooting
 - Write an escalation template for passing issues to vendors or the IT director
